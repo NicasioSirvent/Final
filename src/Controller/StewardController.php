@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Steward;
+use App\Entity\Flight; 
 use App\Repository\StewardRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -119,6 +121,25 @@ class StewardController extends AbstractController
         return $this->json([
             'message' => "Deleted steward with id ". $id,
         ], 200);
+    }
+
+    #[Route('/setFlight', name: 'api_steward_set_flight', methods:['post'])]
+    public function addToFlight(Request $request, ManagerRegistry $doctrine): Response
+    {
+        $mySteward = $this->stewardRepo->find($request->request->get('steward_id'));
+        $myFlight = $doctrine->getRepository(Flight::class)->find($request->request->get('flight_id'));
+        $mySteward->setFlight($myFlight);
+
+
+        $this->stewardRepo->save($mySteward, true);
+
+
+        $data =  [
+            'id' => $mySteward->getId(),
+            ];
+
+
+        return $this->json([$data], 201);
     }
 
 }
